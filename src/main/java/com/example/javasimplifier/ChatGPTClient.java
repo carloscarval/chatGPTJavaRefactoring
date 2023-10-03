@@ -1,8 +1,5 @@
 package com.example.javasimplifier;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,12 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -76,8 +70,7 @@ public class ChatGPTClient {
             JSONObject resJson = new JSONObject(resJsonString);
 
             if (resJson.has("error")) {
-                String errorMsg = resJson.getString("error");
-                return "Error: " + errorMsg;
+                throw new RuntimeException(resJson.toString());
             }
 
             // Parse JSON response
@@ -92,7 +85,7 @@ public class ChatGPTClient {
 
             return responseList.get(0);
         } catch (IOException | JSONException e) {
-            return "Error: " + e.getMessage();
+            throw e;
         }
     }
 

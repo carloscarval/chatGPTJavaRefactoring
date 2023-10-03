@@ -23,6 +23,7 @@ public class JavaRefactorApp extends Application {
 
     private File selectedFile;
     private String selectedFileContent;
+
     public static void main(String[] args) {
         launch();
     }
@@ -78,7 +79,8 @@ public class JavaRefactorApp extends Application {
             try {
                 responseChatGpt = refactorFile(selectedFileContent, languageAndVersion);
             } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                System.out.println(ex.getMessage());
+                return;
             }
             System.out.println(responseChatGpt);
             rewriteFile(responseChatGpt);
