@@ -1,9 +1,13 @@
 package com.example.javasimplifier;
 
 import javafx.application.Application;
+import javafx.concurrent.Task;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -35,9 +39,10 @@ public class JavaRefactorApp extends Application {
         FileChooser fileChooser = new FileChooser();
         ComboBox<String> javaVersionComboBox = createJavaVersionComboBox();
         Button selectFileButton = createSelectFileButton(primaryStage, fileChooser);
-        Button refactorButton = createRefactorButton(javaVersionComboBox);
+        ProgressIndicator progressIndicator = createProgressIndicator();
+        Button refactorButton = createRefactorButton(javaVersionComboBox, progressIndicator);
 
-        VBox vbox = createMainLayout(javaVersionComboBox, selectFileButton, refactorButton);
+        VBox vbox = createMainLayout(javaVersionComboBox, selectFileButton, refactorButton, progressIndicator);
 
         StackPane root = new StackPane(vbox);
         Scene scene = new Scene(root, 300, 200);
@@ -69,23 +74,50 @@ public class JavaRefactorApp extends Application {
         return selectFileButton;
     }
 
-    private Button createRefactorButton(ComboBox<String> javaVersionComboBox) {
+    private ProgressIndicator createProgressIndicator() {
+        ProgressIndicator progressIndicator = new ProgressIndicator();
+        progressIndicator.setVisible(false);
+        return progressIndicator;
+    }
+
+    private Button createRefactorButton(ComboBox<String> javaVersionComboBox, ProgressIndicator progressIndicator) {
         Button refactorButton = new Button("Refactor");
         refactorButton.setOnAction(e -> {
             String languageAndVersion = javaVersionComboBox.getSelectionModel().getSelectedItem();
 
-            backupFile();
-            String responseChatGpt;
-            try {
-                responseChatGpt = refactorFile(selectedFileContent, languageAndVersion);
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-                return;
-            }
-            System.out.println(responseChatGpt);
-            rewriteFile(responseChatGpt);
-            System.out.println("The end");
+            refactorButton.setDisable(true);
+            progressIndicator.setVisible(true);
+
+            Task<String> refactorTask = new Task<>() {
+                @Override
+                protected String call() throws Exception {
+                    backupFile();
+                    return refactorFile(selectedFileContent, languageAndVersion);
+                }
+            };
+
+            refactorTask.setOnSucceeded(event -> {
+                String responseChatGpt = refactorTask.getValue();
+                System.out.println(responseChatGpt);
+                rewriteFile(responseChatGpt);
+
+                refactorButton.setDisable(false);
+                progressIndicator.setVisible(false);
+            });
+
+            refactorTask.setOnFailed(event -> {
+                Throwable exception = refactorTask.getException();
+                if (exception != null) {
+                    System.out.println(exception.getMessage());
+                }
+
+                refactorButton.setDisable(false);
+                progressIndicator.setVisible(false);
+            });
+
+            new Thread(refactorTask).start();
         });
+
         return refactorButton;
     }
 
@@ -120,8 +152,9 @@ public class JavaRefactorApp extends Application {
         }
     }
 
-    private VBox createMainLayout(ComboBox<String> javaVersionComboBox, Button selectFileButton, Button refactorButton) {
-        VBox vbox = new VBox(10, javaVersionComboBox, selectFileButton, refactorButton);
+    private VBox createMainLayout(ComboBox<String> javaVersionComboBox, Button selectFileButton, Button refactorButton,
+                                  ProgressIndicator progressIndicator) {
+        VBox vbox = new VBox(10, javaVersionComboBox, selectFileButton, refactorButton, progressIndicator);
         vbox.setAlignment(javafx.geometry.Pos.CENTER);
         return vbox;
     }
