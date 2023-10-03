@@ -1,4 +1,4 @@
-package com.example.javasimplifier;
+package com.br.chatGPTJavaRefactoring.service;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.javasimplifier.Constants.INSTRUCTIONS;
+import static com.br.chatGPTJavaRefactoring.constants.Constants.INSTRUCTIONS;
 
 public class ChatGPTClient {
 
@@ -36,7 +36,6 @@ public class ChatGPTClient {
         List<String> lines = Files.readAllLines(selectedFile.toPath(), StandardCharsets.UTF_8);
         String selectedFileContent = String.join("\n", lines);
 
-        // Send input to ChatGPT API and display response
         String response = sendRequestToChatGpt(INSTRUCTIONS, selectedFileContent, "");
         System.out.println(response);
     }
@@ -50,19 +49,17 @@ public class ChatGPTClient {
         message.put("content", instructions + code);
         messageList.put(message);
 
-        payload.put("model", "gpt-3.5-turbo"); // model is important
+        payload.put("model", "gpt-3.5-turbo");
         payload.put("messages", messageList);
         payload.put("temperature", 0.7);
 
         StringEntity inputEntity = new StringEntity(payload.toString(), ContentType.APPLICATION_JSON);
 
-        // Build POST request
         HttpPost post = new HttpPost(API_URL);
         post.setEntity(inputEntity);
         post.setHeader("Authorization", "Bearer " + API_KEY);
         post.setHeader("Content-Type", "application/json");
 
-        // Send POST request and parse response
         try (CloseableHttpClient httpClient = HttpClients.createDefault();
              CloseableHttpResponse response = httpClient.execute(post)) {
             HttpEntity resEntity = response.getEntity();
@@ -73,7 +70,6 @@ public class ChatGPTClient {
                 throw new RuntimeException(resJson.toString());
             }
 
-            // Parse JSON response
             JSONArray responseArray = resJson.getJSONArray("choices");
             List<String> responseList = new ArrayList<>();
 
@@ -104,4 +100,3 @@ public class ChatGPTClient {
         return connection;
     }
 }
-

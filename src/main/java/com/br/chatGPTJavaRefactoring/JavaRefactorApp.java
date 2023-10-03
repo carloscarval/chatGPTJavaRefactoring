@@ -1,13 +1,11 @@
-package com.example.javasimplifier;
+package com.br.chatGPTJavaRefactoring;
 
 import javafx.application.Application;
 import javafx.concurrent.Task;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -20,8 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static com.example.javasimplifier.ChatGPTClient.sendRequestToChatGpt;
-import static com.example.javasimplifier.Constants.INSTRUCTIONS;
+import static com.br.chatGPTJavaRefactoring.constants.Constants.INSTRUCTIONS;
+import static com.br.chatGPTJavaRefactoring.service.ChatGPTClient.sendRequestToChatGpt;
 
 public class JavaRefactorApp extends Application {
 
@@ -129,7 +127,6 @@ public class JavaRefactorApp extends Application {
                 throw new RuntimeException("Failed to create backup folder.");
             }
         }
-
         File backupFile = new File(backupFolder, selectedFile.getName() + "BCKP");
         try {
             Files.copy(selectedFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

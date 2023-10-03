@@ -1,4 +1,4 @@
-package com.example.javasimplifier;
+package com.br.chatGPTJavaRefactoring.constants;
 
 public class Constants {
 
